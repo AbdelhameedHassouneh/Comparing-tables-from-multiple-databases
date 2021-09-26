@@ -1,5 +1,8 @@
+
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Driver {
     static final String JDBC_DRIVER = "org.h2.Driver";
@@ -13,9 +16,9 @@ public class Driver {
             Connection conn=createConnection("jdbc:h2:~/newdb1","root","toor");
 
 
-            ArrayList <Person>listFromTable1=createStatementAndExcute(conn,"select * from persons;");
+            HashMap <Integer,Person>map1=createStatementAndExcute(conn,"select * from persons;");
 
-            for (Person p:listFromTable1){
+            for (Map.Entry<Integer, Person> p:map1.entrySet()){
                 System.out.println(p.toString());
 
             }
@@ -26,10 +29,11 @@ public class Driver {
             Connection conn2=createConnection("jdbc:h2:~/newdb2","root","toor");
 
 
-            ArrayList <Person>listFromTable2=createStatementAndExcute(conn2,"select * from persons;");
+            HashMap <Integer,Person>map2=createStatementAndExcute(conn2,"select * from persons;");
 
-            for (Person p:listFromTable2){
+            for (Map.Entry<Integer, Person> p:map2.entrySet()){
                 System.out.println(p.toString());
+
             }
 
 
@@ -40,8 +44,12 @@ public class Driver {
             System.out.println("different rows ");
 
 
-
-
+            for (Integer i:map2.keySet()) {
+                Person person=map2.get(i);
+                if(map1.get(i)==null||!person.equal(map1.get(i))){
+                    System.out.println(person.toString());
+                }
+            }
 
 
         } catch (ClassNotFoundException e) {
@@ -69,8 +77,7 @@ public class Driver {
     }
 
     public static Connection createConnection(String db_url,String user,String pass){
-        //STEP 2: Open a connection
-        System.out.println("Connecting to database...");
+
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(db_url,user,pass);
@@ -83,10 +90,10 @@ public class Driver {
 
     }
 
-    public static ArrayList<Person> createStatementAndExcute(Connection conn, String query){
+    public static HashMap<Integer,Person> createStatementAndExcute(Connection conn, String query){
         //STEP 3: Execute a query
-        System.out.println("Creating table in given database...");
-        ArrayList<Person>personsList=new ArrayList<>();
+        HashMap<Integer,Person>map =new HashMap<>();
+
         Statement stmt = null;
         try {
             stmt = conn.createStatement();
@@ -97,22 +104,50 @@ public class Driver {
         try {
             ResultSet rs = stmt.executeQuery(query);
             while(rs.next()){
-                personsList.add(new Person(rs.getInt("PersonID"),rs.getString("FirstName"),rs.getString("LastName")));
+                map.put(rs.getInt("PersonID"),new Person(rs.getInt("PersonID"),rs.getString("FirstName"),rs.getString("LastName")));
 
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("Created table in given database...");
         try {
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return personsList;
-
-
+        return map;
     }
+
+    public static ArrayList<Person> createStatementAndExcute2(Connection conn, String query){
+        //STEP 3: Execute a query
+        ArrayList<Person>list =new ArrayList<>();
+
+        Statement stmt = null;
+        try {
+            stmt = conn.createStatement();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()){
+                list.add(new Person(rs.getInt("PersonID"),rs.getString("FirstName"),rs.getString("LastName")));
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
 
 }

@@ -1,40 +1,47 @@
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class ComparisionClass {
     public static void main(String[] args) {
 
-        try {
-
-            Class.forName("org.h2.Driver");
-            Scanner input=new Scanner(System.in);
-            System.out.println("Please enter the name of the database1");
-            String db1NameToConnect=input.next();
-            DataBaseC database1=grapData(db1NameToConnect);
-            System.out.println("*************************************************");
-            System.out.println("Please enter the name of the database2");
-            String db2NameToConnect=input.next();
-            DataBaseC database2=grapData(db2NameToConnect);
-
-            compareDatabases(database1,database2);
 
 
-
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//
+//
+//            Scanner input=new Scanner(System.in);
+//            System.out.println("Please enter the name of the database1");
+//            String db1NameToConnect=input.next();
+             DataBaseC database1=readProperityFileAndGrepData("JDBCconf1.properties");
+//            System.out.println("*************************************************");
+//            System.out.println("Please enter the name of the database2");
+//            String db2NameToConnect=input.next();
+                DataBaseC database2=readProperityFileAndGrepData("JDBCconf2.properties");
+//
+          compareDatabases(database1,database2);
+//
+//
+//
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
 
 
     }
 
 
 
-    public static DataBaseC grapData(String db1NameToConnect){
+    public static DataBaseC grapData(String driverClass,String url,String usr,String pw){
+        try {
+            Class.forName(driverClass);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         DataBaseC database=new DataBaseC();
-        Connection conn=createConnection("jdbc:h2:~/"+db1NameToConnect,"root","toor");
+        Connection conn=createConnection(url,usr,pw);
         try {
 
             DatabaseMetaData dbMeta=conn.getMetaData();
@@ -74,7 +81,7 @@ public class ComparisionClass {
                 size++;
                 database.tables.put(table.tableName,table);
             }
-            database.dataBaseName=db1NameToConnect;
+            database.dataBaseName="bla";
             database.numberOfTables=size;
 
         } catch (SQLException e) {
@@ -170,6 +177,39 @@ public class ComparisionClass {
         return conn;
 
 
+
+    }
+
+
+    public static DataBaseC readProperityFileAndGrepData(String filePath){
+        Properties props=new Properties();
+        String dbDriverClass="";
+        String dbConnUrl="";
+        String dbUserName="";
+        String dbPassword="";
+
+        try {
+            FileReader fileReader=new FileReader(filePath);
+            props.load(fileReader);
+             dbDriverClass = props.getProperty("db.driver.class");
+
+             dbConnUrl = props.getProperty("db.conn.url");
+
+             dbUserName = props.getProperty("db.username");
+
+             dbPassword = props.getProperty("db.password");
+
+
+            System.out.println(dbDriverClass+" "+dbConnUrl);
+
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return grapData(dbDriverClass,dbConnUrl,dbUserName,dbPassword);
 
     }
 }

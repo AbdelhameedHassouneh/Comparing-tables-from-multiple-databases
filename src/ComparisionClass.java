@@ -60,10 +60,15 @@ public class ComparisionClass {
 
 
                     String datatype = columns.getString("TYPE_NAME");
+                    int cSize =columns.getInt("COLUMN_SIZE");
+
+
 
                     Column c=new Column();
                     c.title=columnName;
                     c.dataType=datatype;
+                    c.size=cSize;
+
                     table.columns.put(c.title,c);
                 }
                 size++;
@@ -106,7 +111,7 @@ public class ComparisionClass {
                 System.out.println("Note this table doesn't exist in db1");
                 System.out.println("Primary key of this table in db2 is: "+table.primaryKey);
                 for (Column column : table.columns.values()) {
-                    System.out.println(column.title+" "+ column.dataType);
+                    System.out.println(column.title+" "+ column.dataType+" "+column.size);
 
                 }
             }else {
@@ -118,17 +123,17 @@ public class ComparisionClass {
                     Column c=tableindb1.columns.get(column.title);
                     if(c==null){
 
-                        System.out.println(column.title+" "+ column.dataType+" doesn't exist in db1");
+                        System.out.println(column.title+" "+ column.dataType+" "+column.size+" doesn't exist in db1");
 
 
 
                     }else{
-                        if(column.title.equals(c.title)&&column.dataType.equals(c.dataType)){
+                        if(column.title.equals(c.title)&&column.dataType.equals(c.dataType)&&column.size==c.size){
 
-                            System.out.println(column.title+" "+ column.dataType+": exists and the same");
+                            System.out.println(column.title+" "+ column.dataType+" "+column.size+": exists and the same");
 
-                        }else if(column.title.equals(c.title)&&!(column.dataType.equals(c.dataType))){
-                            System.out.println(column.title+" "+ column.dataType+"---"+c.title+" "+c.dataType+" modified in db2");
+                        }else if(column.title.equals(c.title)&&(!(column.dataType.equals(c.dataType))||!(column.size==c.size))){
+                            System.out.println(column.title+" "+ column.dataType+" "+column.size+"---"+c.title+" "+c.dataType+" "+c.size+" modified in db2");
 
                         }
                     }

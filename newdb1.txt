@@ -1,0 +1,18 @@
+DataBase 1 Name :newdb2
+Database 1 #Of Tables: 4
+DataBase 2 Name :newdb1
+Database 2 #Of Tables: 4
+**************Going through tables:*************
+Table Name: STUDENT
+*Note this table exists in newdb1  and in newdb2
+City VARCHAR 255: Newly added in newdb1
+------------------------------------------
+Table Name: TEACHERASSISTANT
+*Note This table exists in newdb1 and it doesn't exist in newdb2
+Primary key: TAID
+TAID INT 10
+------------------------------------------
+Table Name: Hall
+*Note this table exists in newdb1  and in newdb2
+College VARCHAR 255 : Modefied in newdb1
+------------------------------------------

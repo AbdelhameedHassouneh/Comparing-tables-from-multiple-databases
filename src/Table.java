@@ -8,7 +8,7 @@ public class Table {
     HashMap<String,String []> data;
     HashMap<String,Column> columns;
     String primaryKey;
-    boolean visited=false;
+
 
 
     public Table() {

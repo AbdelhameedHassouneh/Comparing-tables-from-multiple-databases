@@ -3,7 +3,7 @@ public class Column {
     String title;
     int size ;
 
-    boolean visited=false;
+
 
 
     public Column() {

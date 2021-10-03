@@ -10,6 +10,8 @@ public class ComparisionClass {
         DataBaseC database2 = readProperityFileAndGrepData("JDBCconf2.properties");
 
         compareDatabases(database1, database2);
+        compareDatabases(database2, database1);
+
 
 
     }
@@ -22,7 +24,7 @@ public class ComparisionClass {
             e.printStackTrace();
         }
         DataBaseC database = new DataBaseC();
-        Connection conn = createConnection(url, usr, pw);
+        Connection conn = createConnection(url+"?autoReconnect=true&useSSL=false", usr, pw);
         try {
 
             DatabaseMetaData dbMeta = conn.getMetaData();
@@ -61,7 +63,8 @@ public class ComparisionClass {
                 size++;
                 database.tables.put(table.tableName, table);
             }
-            database.dataBaseName = url.split("~/")[1];
+            String str[]=url.split("/");
+            database.dataBaseName = str[str.length-1];
             database.numberOfTables = size;
 
         } catch (SQLException e) {
@@ -80,12 +83,13 @@ public class ComparisionClass {
     public static void compareDatabases(DataBaseC db1, DataBaseC db2) {
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter("Report.txt");
+            pw = new PrintWriter(db2.dataBaseName+".txt");
+
         } catch (IOException e) {
 
             e.printStackTrace();
         }
-        System.out.println("in");
+
 
 
         pw.append("DataBase 1 Name :" + db1.dataBaseName + "\n");
@@ -95,90 +99,69 @@ public class ComparisionClass {
         pw.append("Database 2 #Of Tables: " + db2.numberOfTables + "\n");
         pw.append("**************Going through tables:*************\n");
         for (Map.Entry<String, Table> entry : db2.tables.entrySet()) {
+            //This boolean is made when the table exists in the 2 databases, but we might face a difference during the Iteration
+            boolean isThereADifference=false;
 
             Table table = (Table) entry.getValue();
 
-            pw.append("Table Name: " + table.tableName + "\n");
+
             Table tableindb1 = db1.tables.get(table.tableName);
 
             if (tableindb1 == null) {
-
-                pw.append("*Note This table exists in db2 and it doesn't exist in db1\n");
-                pw.append("Primary key of this table in db2 is: " + table.primaryKey + "\n");
+                pw.append("Table Name: " + table.tableName + "\n");
+                pw.append("*Note This table exists in "+db2.dataBaseName+" and it doesn't exist in "+db1.dataBaseName+"\n");
+                pw.append("Primary key: " + table.primaryKey + "\n");
                 for (Column column : table.columns.values()) {
                     pw.append(column.title + " " + column.dataType + " " + column.size + "\n");
-                    column.visited = true;
+
 
                 }
-                table.visited = true;
+                isThereADifference=true;
             } else {
-                pw.append("*Note this table exists in db2 and db1\n");
-                pw.append("Primary key of this table in db2 is: " + table.primaryKey + " and in db1 is: " + tableindb1.primaryKey + "\n");
+
+
+
+                if(!table.primaryKey.equalsIgnoreCase(tableindb1.primaryKey)){
+                    pw.append("Table Name: " + table.tableName + "\n");
+                    pw.append("*Note this table exists in "+db2.dataBaseName+"  and in "+db1.dataBaseName+"\n");
+                    pw.append("Primary key of this table in db2 is: " + table.primaryKey + " and in db1 is: " + tableindb1.primaryKey + "\n");
+                    isThereADifference=true;
+
+                }
 
 
                 for (Column column : table.columns.values()) {
                     Column c = tableindb1.columns.get(column.title);
                     if (c == null) {
+                        if(!isThereADifference){
+                            pw.append("Table Name: " + table.tableName + "\n");
+                            pw.append("*Note this table exists in "+db2.dataBaseName+"  and in "+db1.dataBaseName+"\n");
+                            isThereADifference=true;
+                        }
 
-                        pw.append(column.title + " " + column.dataType + " " + column.size + " exists in db2 and it doesn't exist in db1\n");
-                        column.visited = true;
+                        pw.append(column.title + " " + column.dataType + " " + column.size + ": Newly added in "+db2.dataBaseName+"\n");
 
                     } else {
-                        if (column.title.equals(c.title) && column.dataType.equals(c.dataType) && column.size == c.size) {
-
-                            pw.append(column.title + " " + column.dataType + " " + column.size + ": exists and the same\n");
-
-
-                        } else if (column.title.equals(c.title) && (!(column.dataType.equals(c.dataType)) || !(column.size == c.size))) {
-                            pw.append(column.title + " " + column.dataType + " " + column.size + " in db2 --- " + c.title + " " + c.dataType + " " + c.size + " in db1 , modified in db2\n");
+                        if (column.title.equalsIgnoreCase(c.title) && (!(column.dataType.equals(c.dataType)) || !(column.size == c.size))) {
+                            if(!isThereADifference){
+                                pw.append("Table Name: " + table.tableName + "\n");
+                                pw.append("*Note this table exists in "+db2.dataBaseName+"  and in "+db1.dataBaseName+"\n");
+                                isThereADifference=true;
+                            }
+                            pw.append(column.title + " " + column.dataType + " " + column.size + " : Modefied in "+db2.dataBaseName+"\n");
 
                         }
-                        c.visited = true;
-                        column.visited = true;
+
 
                     }
                 }
-
-                //-----------------------
-                for (Column column : tableindb1.columns.values()) {
-                    if (!column.visited)
-                        pw.append(column.title + " " + column.dataType + " " + column.size + " exists in db1 and it doesn't exist in db2\n");
-
-                }
-                //--------------------------
-
-
-                table.visited = true;
-                tableindb1.visited = true;
-
             }
 
-
+            if(isThereADifference)
             pw.append("------------------------------------------\n");
 
         }
-        for (Map.Entry<String, Table> entry : db1.tables.entrySet()) {
-            Table table = (Table) entry.getValue();
-            if (!table.visited) {
-                pw.append("Table Name: " + table.tableName + "\n");
-                pw.append("*Note This table exists in db1 and it doesn't exist in db2\n");
-                pw.append("Primary key of this table in db1 is: " + table.primaryKey + "\n");
 
-                for (Column column : table.columns.values()) {
-
-                    pw.append(column.title + " " + column.dataType + " " + column.size + "\n");
-                    column.visited = true;
-
-
-                }
-
-
-                table.visited = true;
-                pw.append("------------------------------------------\n");
-            }
-
-
-        }
 
 
         pw.close();

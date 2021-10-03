@@ -1,0 +1,41 @@
+DataBase 1 Name :newdb1
+Database 1 #Of Tables: 4
+DataBase 2 Name :newdb2
+Database 2 #Of Tables: 4
+**************Going through tables:*************
+Table Name: STUDENT
+*Note this table exists in db2 and db1
+Primary key of this table in db2 is: STUDENTID and in db1 is: STUDENTID
+LASTNAME VARCHAR 255: exists and the same
+STUDENTID INTEGER 10: exists and the same
+GENDER VARCHAR 255 exists in db2 and it doesn't exist in db1
+FIRSTNAME VARCHAR 255: exists and the same
+EMAIL VARCHAR 255: exists and the same
+MAGOR VARCHAR 255: exists and the same
+CITY VARCHAR 255 exists in db1 and it doesn't exist in db2
+------------------------------------------
+Table Name: TUTOR
+*Note this table exists in db2 and db1
+Primary key of this table in db2 is: TUTORID and in db1 is: TUTORID
+LASTNAME VARCHAR 255: exists and the same
+FIRSTNAME VARCHAR 255: exists and the same
+DEGREE VARCHAR 255 exists in db2 and it doesn't exist in db1
+EMAIL VARCHAR 255: exists and the same
+TUTORID INTEGER 10: exists and the same
+------------------------------------------
+Table Name: HALL
+*Note this table exists in db2 and db1
+Primary key of this table in db2 is: HALLID and in db1 is: HALLID
+HALLID INTEGER 10: exists and the same
+COLLEGE INTEGER 10 in db2 --- COLLEGE VARCHAR 255 in db1 , modified in db2
+------------------------------------------
+Table Name: COURSE
+*Note This table exists in db2 and it doesn't exist in db1
+Primary key of this table in db2 is: COURSEID
+COURSEID INTEGER 10
+------------------------------------------
+Table Name: TEACHERASSISTANT
+*Note This table exists in db1 and it doesn't exist in db2
+Primary key of this table in db1 is: TAID
+TAID INTEGER 10
+------------------------------------------
